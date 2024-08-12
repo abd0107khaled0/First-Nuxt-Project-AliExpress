@@ -44,6 +44,39 @@
               </div>
             </div>
           </div>
+
+          <div class="md:hidden block my-4" />
+          <div class="md:w-[35%]">
+            <div id="Summary" class="rounded-lg p-4 bg-red-100 -mt-0"></div>
+            <div class="text-2xl font-extrabold mb-2">Summary</div>
+            <div
+              class="flex items-center justify-between my-4 bg-red-100 p-1 rounded-lg"
+            >
+              <div class="font-semibold">Total</div>
+              <div class="text-2xl font-semibold">
+                $ <span class="font-extrabold">{{ totalPriceComputed }}</span>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              @click="gotToCheckout"
+              class="flex justify-center w-full bg-[#fd374f] text-white text-[21px] font-semibold p-1.5 rounded-full mt-4"
+            >
+              Checkout
+            </button>
+            <div id="PaymentProtection" class="bg-red-100 rounded-lg p-4 mt-4">
+              <div class="text-lg font-semibold mb-2">Payment methods</div>
+              <div class="flex items-center justify-start gap-8 my-4">
+                <div
+                  v-for="(card, index) in cards"
+                  :key="index + Math.random()"
+                >
+                  <img :src="card" alt="card" class="h-6" />
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </MainLayout>
@@ -52,6 +85,16 @@
 
 <script setup>
 import MainLayout from "~/layouts/MainLayout.vue";
+import { useUserStore } from "~/stores/store.js";
+const userStore = useUserStore();
+
+let selectedArray = ref([]);
+
+onMounted(() => {
+  setTimeout(() => {
+    userStore.isLoading = true;
+  }, 200);
+});
 
 const products = [
   {
@@ -72,7 +115,44 @@ const products = [
   },
 ];
 
-const selectedRadioFunc = () => {};
+const cards = ["/mastercard.png", "/visa.png", "/paypal.png", "/applepay.png"];
+
+const totalPriceComputed = computed(() => {
+  let price = 0;
+  userStore.cart.forEach((prod) => {
+    price += prod.price;
+  });
+  return price;
+});
+
+const selectedRadioFunc = (e) => {
+  if (!selectedArray.value.length) {
+    selectedArray.value.push(e);
+    return;
+  }
+  selectedArray.value.forEach((item, index) => {
+    if (e.id != item.id) {
+      selectedArray.value.push(e);
+    } else {
+      selectedArray.value.splice(index, 1);
+    }
+  });
+};
+
+const gotToCheckout = ()=>{
+  let ids = []
+  userStore.checkout = [];
+  selectedArray.value.forEach((item) => {
+    ids.push(item.id);
+  });
+  let res = userStore.cart.filter((item)=> {
+    return ids.indexOf(item.id) != -1;
+  });
+
+  res.forEach(item => userStore.checkout.push(toRaw(item)))
+  return navigateTo('/checkout')
+}
+
 </script>
 
 <style lang="scss" scoped></style>

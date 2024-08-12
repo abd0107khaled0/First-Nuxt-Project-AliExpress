@@ -169,7 +169,7 @@
         </div>
       </div>
     </div>
-    <Loading v-if="userStore?.isLoading" />
+    <Loading v-if="userStore?.isLoading && false" />
     <div class="lg:pt-[150px] md:pt-[130px] pt-[80px]" />
     <slot />
     <Footer v-if="!userStore?.isLoading" />
@@ -184,7 +184,6 @@ let isAccountMenu = ref(false);
 let isCartHover = ref(false);
 let isSearching = ref(true);
 let searchItem = ref("");
-console.log(userStore.isLoading)
 
 // function
 const NavigateTeast = function (path) {
